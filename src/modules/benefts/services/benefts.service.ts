@@ -6,6 +6,7 @@ import {
 } from 'src/shared/common/axios/benefits.dto';
 import { HttpService } from 'src/shared/common/axios/httpService';
 import { ClientProxyApplication } from 'src/shared/common/rabbitmq/clientProxy/clientProxy';
+import { CacheReadService } from 'src/shared/common/redis/services/redis.service';
 import { benefitsQueueRequest } from '../dtos/benefts.dto';
 import BenefitsInterface from '../interfaces/benefts.interface';
 
@@ -14,6 +15,7 @@ export class BenefitsService implements BenefitsInterface {
   constructor(
     private readonly httpService: HttpService,
     private readonly rabbitmqService: ClientProxyApplication,
+    private readonly redisService: CacheReadService,
   ) {}
   async getBenefits(
     document: string,
@@ -29,11 +31,19 @@ export class BenefitsService implements BenefitsInterface {
   }
 
   async sendDocumntToQueue(documents: benefitsQueueRequest) {
-    await this.rabbitmqService
-      .getClientProxy()
-      .emit(
-        'documents_benefits',
-        Buffer.from(JSON.stringify(documents.documents)),
-      );
+    //   documents.documents.forEach(async (element) => {
+    //     const keyCache = `customer-${element.substring(0, 3)}`;
+    //     await this.cacheWriteService.addInformationToCache(keyCache, element);
+    // });
+
+    // const documentExists = await this.redisService.readInformationFromCache(
+    //   `customer-${element.substring(0, 3)}`,
+    // );
+
+    documents.documents.forEach(async (element) => {
+      this.rabbitmqService
+        .getClientProxy()
+        .emit('documents-benefits', JSON.stringify(element));
+    });
   }
 }

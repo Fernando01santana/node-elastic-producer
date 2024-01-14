@@ -5,14 +5,14 @@ import {
 } from '@nestjs/microservices';
 
 export class ClientProxyApplication {
-  private clientAdminBackend: ClientProxy;
+  private clientProducer: ClientProxy;
 
   getClientProxy(): ClientProxy {
-    return (this.clientAdminBackend = ClientProxyFactory.create({
+    return (this.clientProducer = ClientProxyFactory.create({
       transport: Transport.RMQ,
       options: {
-        urls: ['amqp://localhost:5672'],
-        queue: 'teste',
+        urls: [process.env.RABBITMQ_URI],
+        queue: process.env.RABBIRMQ_QUEUE_NAME,
       },
     }));
   }
