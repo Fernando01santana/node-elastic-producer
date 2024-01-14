@@ -7,10 +7,8 @@ import { BenefitsResponseDto, RequestBenefitsDto } from './benefits.dto';
 export class HttpService {
   private readonly authenticationHost: string = process.env.AUTHENTICATION_HOST;
 
-  async getBenefits(
-    url: string,
-    data: RequestBenefitsDto,
-  ): Promise<BenefitsResponseDto> {
+  async getBenefits(data: RequestBenefitsDto): Promise<BenefitsResponseDto> {
+    const url = '/api/v1/inss/consulta-beneficios?cpf=';
     const headers = {
       Authorization: data.token,
     };
