@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import { config } from 'dotenv';
 import { RequestTokenDto } from './auth.dto';
-import { BenefitsResponseDto, RequestBenefitsDto } from './benefits.dto';
-
+import { BenefitsResponseDto } from './benefits.dto';
+config();
 @Injectable()
 export class HttpService {
   private readonly authenticationHost: string = process.env.AUTHENTICATION_HOST;
 
-  async getBenefits(data: RequestBenefitsDto): Promise<BenefitsResponseDto> {
-    const url = '/api/v1/inss/consulta-beneficios?cpf=';
+  async getBenefits(document: string): Promise<BenefitsResponseDto> {
+    const dataAuth = await this.getToken();
     const headers = {
-      Authorization: data.token,
+      Authorization: `Bearer ${dataAuth.token}`,
     };
-    const endpoint = `${this.authenticationHost}${url}${data.document}`;
-    console.log(endpoint);
-
+    const url = '/api/v1/inss/consulta-beneficios?cpf=';
+    const endpoint = `${this.authenticationHost}${url}${document}`;
     const response: AxiosResponse = await axios.get(endpoint, {
       headers: headers,
     });
@@ -29,8 +29,13 @@ export class HttpService {
     return benefitData;
   }
 
-  async getToken(url: string, data: any): Promise<any> {
+  async getToken(): Promise<RequestTokenDto> {
     try {
+      const url = 'api/v1/token';
+      const data = {
+        username: process.env.EXTERNAL_API_USERNAME,
+        password: process.env.EXTERNAL_API_PASSWORD,
+      };
       const endpoint = `${this.authenticationHost}/${url}`;
       const response: AxiosResponse = await axios.post(endpoint, data);
 
