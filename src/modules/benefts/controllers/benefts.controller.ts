@@ -13,6 +13,6 @@ export class BenefitsController {
 
   @Post('documents')
   async documentsToQueue(@Body() data: BenefitsQueueRequestDto): Promise<any> {
-    return await this.benefitsService.sendDocumntToQueue(data);
+    return await this.benefitsService.sendDocumnetToQueue(data);
   }
 }

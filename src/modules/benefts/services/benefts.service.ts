@@ -17,11 +17,13 @@ export class BenefitsService implements BenefitsInterface {
     return benefits;
   }
 
-  async sendDocumntToQueue(documents: BenefitsQueueRequestDto) {
+  async sendDocumnetToQueue(documents: BenefitsQueueRequestDto) {
     documents.documents.forEach(async (element) => {
-      this.rabbitmqService
+      await this.rabbitmqService
         .getClientProxy()
-        .emit('documents-benefits', JSON.stringify(element));
+        .then((clientProxy) =>
+          clientProxy.emit('documents-benefits', JSON.stringify(element)),
+        );
     });
   }
 }
