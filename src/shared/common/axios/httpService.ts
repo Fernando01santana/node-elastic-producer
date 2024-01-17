@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import axios, { AxiosError, AxiosResponse, HttpStatusCode } from 'axios';
 import { config } from 'dotenv';
 import { RequestTokenDto } from './auth.dto';
 import { BenefitsResponseDto } from './benefits.dto';
@@ -18,14 +18,19 @@ export class HttpService {
     const response: AxiosResponse = await axios.get(endpoint, {
       headers: headers,
     });
-    const benefitData: BenefitsResponseDto = {
-      success: response.data.success,
-      data: {
-        beneficios: response.data.data.beneficios,
-        cpf: response.data.data.cpf,
-      },
-    };
 
+    let benefitData: BenefitsResponseDto;
+    if (response && response.status === HttpStatusCode.Ok) {
+      benefitData.success = response.data.success;
+      benefitData.data.beneficios = response.data.data.beneficios;
+      benefitData.data.cpf = response.data.data.cpf;
+
+      return benefitData;
+    }
+
+    if (response.status >= HttpStatusCode.BadRequest) {
+      throw new Error(response.statusText);
+    }
     return benefitData;
   }
 
@@ -38,14 +43,18 @@ export class HttpService {
       };
       const endpoint = `${this.authenticationHost}/${url}`;
       const response: AxiosResponse = await axios.post(endpoint, data);
+      let token: RequestTokenDto;
 
-      const tokenDto: RequestTokenDto = {
-        token: response.data.data.token,
-        expiresIn: response.data.data.expiresIn,
-        success: response.data.success,
-      };
-
-      return tokenDto;
+      if (response && response.status === HttpStatus.OK) {
+        token.expiresIn = response.data.data.expiresIn;
+        token.success = response.data.data.success;
+        token.token = response.data.data.token;
+        return token;
+      }
+      if (response.status >= HttpStatusCode.BadRequest) {
+        throw new Error(response.statusText);
+      }
+      return token;
     } catch (error) {
       throw this.handleError(error);
     }

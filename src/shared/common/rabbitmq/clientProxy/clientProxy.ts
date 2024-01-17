@@ -7,7 +7,7 @@ import {
 export class ClientProxyApplication {
   private clientProducer: ClientProxy;
 
-  async getClientProxy(): Promise<ClientProxy> {
+  getClientProxy(): ClientProxy {
     try {
       return (this.clientProducer = ClientProxyFactory.create({
         transport: Transport.RMQ,
@@ -18,6 +18,7 @@ export class ClientProxyApplication {
       }));
     } catch (error) {
       console.error(error);
+      throw error; // Lançar o erro para o chamador, se necessário
     }
   }
 }
