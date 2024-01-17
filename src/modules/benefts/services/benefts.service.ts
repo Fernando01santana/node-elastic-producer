@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { BenefitsResponseDto } from 'src/shared/common/axios/benefits.dto';
-import { HttpService } from 'src/shared/common/axios/httpService';
-import { ClientProxyApplication } from 'src/shared/common/rabbitmq/clientProxy/clientProxy';
+import { BenefitsResponseDto } from '../../../shared/common/axios/benefits.dto';
+import { HttpService } from '../../../shared/common/axios/httpService';
+import { ClientProxyApplication } from '../../../shared/common/rabbitmq/clientProxy/clientProxy';
 import { BenefitsQueueRequestDto } from '../dtos/benefts.dto';
 import BenefitsInterface from '../interfaces/benefts.interface';
 
@@ -19,11 +19,9 @@ export class BenefitsService implements BenefitsInterface {
 
   async sendDocumnetToQueue(documents: BenefitsQueueRequestDto) {
     documents.documents.forEach(async (element) => {
-      await this.rabbitmqService
+      this.rabbitmqService
         .getClientProxy()
-        .then((clientProxy) =>
-          clientProxy.emit('documents-benefits', JSON.stringify(element)),
-        );
+        .emit('documents-benefits', JSON.stringify(element));
     });
   }
 }
